@@ -1,73 +1,79 @@
-# React + TypeScript + Vite
+**Gestor de Tareas — Frontend**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este repositorio contiene el frontend del ``Gestor de Tareas`` — una SPA construida con React, TypeScript, Vite y TailwindCSS. A continuación se documenta la arquitectura, flujo de datos, componentes clave, decisiones de diseño y cómo ejecutar el proyecto.
 
-Currently, two official plugins are available:
+**Resumen**
+- **Propósito:** Interfaz para listar, crear, buscar, actualizar y eliminar tareas.
+- **Stack:** React 19 + TypeScript, Vite, TailwindCSS.
+- **Punto de entrada:** [taskApi/src/main.tsx](taskApi/src/main.tsx)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Estructura del Proyecto**
+- **Configuración / Scripts:** [taskApi/package.json](taskApi/package.json)
+- **Entrypoint:** [taskApi/src/main.tsx](taskApi/src/main.tsx)
+- **App wrapper:** [taskApi/src/app/App.tsx](taskApi/src/app/App.tsx)
+- **Página de tareas:** [taskApi/src/features/tasks/pages/TaskPage.tsx](taskApi/src/features/tasks/pages/TaskPage.tsx)
+- **Componentes:**
+	- [taskApi/src/features/tasks/components/TaskForm.tsx](taskApi/src/features/tasks/components/TaskForm.tsx)
+	- [taskApi/src/features/tasks/components/TaskSearch.tsx](taskApi/src/features/tasks/components/TaskSearch.tsx) (búsqueda)
+	- [taskApi/src/features/tasks/components/TaskList.tsx](taskApi/src/features/tasks/components/TaskList.tsx)
+	- [taskApi/src/features/tasks/components/TaskItem.tsx](taskApi/src/features/tasks/components/TaskItem.tsx)
+	- [taskApi/src/features/tasks/components/TaskEmptyState.tsx](taskApi/src/features/tasks/components/TaskEmptyState.tsx)
+	- [taskApi/src/features/tasks/components/TaskErrorMessage.tsx](taskApi/src/features/tasks/components/TaskErrorMessage.tsx)
+- **Hook de lógica:** [taskApi/src/features/tasks/hooks/useTasks.ts](taskApi/src/features/tasks/hooks/useTasks.ts)
+- **Servicios (API):** [taskApi/src/features/tasks/services/taskService.ts](taskApi/src/features/tasks/services/taskService.ts)
+- **Tipos:** [taskApi/src/features/tasks/types/task.types.ts](taskApi/src/features/tasks/types/task.types.ts)
 
-## React Compiler
+**Arquitectura (diagrama)**
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```mermaid
+flowchart LR
+	U[Usuario] -->|Interacción| B[Browser]
+	B -->|SPA| F[Frontend (React + Vite)]
+	F -->|HTTP (fetch) => VITE_API_URL| API[Backend API]
+	API --> DB[(Base de datos)]
+	style F fill:#f9f,stroke:#333,stroke-width:1px
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Flujo de la aplicación (secuencia)**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```mermaid
+sequenceDiagram
+	participant U as Usuario
+	participant UI as UI (TaskForm / TaskSearch)
+	participant H as useTasks (hook)
+	participant S as taskService
+	participant API as Backend API
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+	U->>UI: crear / buscar / eliminar tarea
+	UI->>H: invoca addTask / searchTasks / removeTask
+	H->>S: llama a createTask / getTasks / deleteTask / updateTask
+	S->>API: fetch HTTP
+	API-->>S: JSON response
+	S-->>H: retorna datos o lanza error
+	H-->>UI: actualiza estado local
+	UI-->>U: render actualizado
 ```
+
+**Descripción de componentes y responsabilidades**
+- **TaskPage (pagina):** Orquesta la UI: monta `TaskForm`, `TaskSearch`, `TaskList` y muestra errores/estado. Archivo: [taskApi/src/features/tasks/pages/TaskPage.tsx](taskApi/src/features/tasks/pages/TaskPage.tsx)
+- **TaskForm:** Formulario controlado para crear tareas. Llama a `onAddTask` pasado desde el hook. Archivo: [taskApi/src/features/tasks/components/TaskForm.tsx](taskApi/src/features/tasks/components/TaskForm.tsx)
+- **TaskSearch:** Entrada para búsquedas (comunica con el hook para filtrar tareas).
+- **TaskList / TaskItem:** Render de lista, estados de carga y vacíos. `TaskItem` maneja toggle completo y eliminación.
+- **useTasks (hook):** Contiene la lógica de estado (tareas, loading, errors, búsqueda, submit). Es el único lugar donde se usa `taskService`.
+- **taskService:** Abstracción HTTP hacia la API. Implementa `getTasks`, `createTask`, `deleteTask`, `updateTask`. Usa `VITE_API_URL` con fallback `http://localhost:8081/api/tasks`. Archivo: [taskApi/src/features/tasks/services/taskService.ts](taskApi/src/features/tasks/services/taskService.ts)
+- **Tipos:** Interfaz `Task` y `CreateTaskRequest` en [taskApi/src/features/tasks/types/task.types.ts](taskApi/src/features/tasks/types/task.types.ts)
+
+
+**Cómo ejecutar (desarrollo)**
+En la carpeta `taskApi`:
+
+```bash
+cd taskApi
+npm install
+npm run dev
+```
+
+- `npm run dev` inicia Vite en modo desarrollo. La app espera la API disponible en `VITE_API_URL`.
+- Para producción: `npm run build` crea los artefactos (requiere TypeScript build y Vite build).
+
+
