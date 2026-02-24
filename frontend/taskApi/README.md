@@ -27,31 +27,29 @@ Este repositorio contiene el frontend del ``Gestor de Tareas`` — una SPA const
 
 ```mermaid
 flowchart LR
-	U[Usuario] -->|Interacción| B[Browser]
-	B -->|SPA| F[Frontend (React + Vite)]
-	F -->|HTTP (fetch) => VITE_API_URL| API[Backend API]
-	API --> DB[(Base de datos)]
-	style F fill:#f9f,stroke:#333,stroke-width:1px
+  U[Usuario] -->|Interacción| B[Browser]
+  B -->|SPA| F[Frontend]
+  F -->|HTTP| API[Backend API]
+  API --> DB[(DB)]
 ```
-
 **Flujo de la aplicación (secuencia)**
 
 ```mermaid
 sequenceDiagram
-	participant U as Usuario
-	participant UI as UI (TaskForm / TaskSearch)
-	participant H as useTasks (hook)
-	participant S as taskService
-	participant API as Backend API
+  participant U as Usuario
+  participant UI as UI_Form
+  participant H as Hook_useTasks
+  participant S as taskService
+  participant API as Backend_API
 
-	U->>UI: crear / buscar / eliminar tarea
-	UI->>H: invoca addTask / searchTasks / removeTask
-	H->>S: llama a createTask / getTasks / deleteTask / updateTask
-	S->>API: fetch HTTP
-	API-->>S: JSON response
-	S-->>H: retorna datos o lanza error
-	H-->>UI: actualiza estado local
-	UI-->>U: render actualizado
+  U->>UI: crear / buscar / eliminar tarea
+  UI->>H: invoca addTask / searchTasks / removeTask
+  H->>S: llama a createTask / getTasks / deleteTask / updateTask
+  S->>API: fetch HTTP
+  API-->>S: JSON response
+  S-->>H: retorna datos o lanza error
+  H-->>UI: actualiza estado local
+  UI-->>U: render actualizado
 ```
 
 **Descripción de componentes y responsabilidades**
@@ -75,5 +73,3 @@ npm run dev
 
 - `npm run dev` inicia Vite en modo desarrollo. La app espera la API disponible en `VITE_API_URL`.
 - Para producción: `npm run build` crea los artefactos (requiere TypeScript build y Vite build).
-
-

@@ -37,9 +37,9 @@ Resumen de la arquitectura
 ```mermaid
 flowchart LR
   U[Usuario] --> B[Browser]
-  B --> F[Frontend (React + Vite)]
-  F --> API[Backend API (Spring Boot)]
-  API --> DB[(H2 Database)]
+  B --> F[Frontend]
+  F --> API[Backend API]
+  API --> DB[(H2 DB)]
 ```
 
 Endpoints principales (Backend)
@@ -137,4 +137,3 @@ Notas rápidas
 Contacto y ayuda
 
 Para más detalles revisa los READMEs específicos en `backend/gestor-de-tareas/Readme.md` y `frontend/taskApi/README.md` dentro del repositorio.
-

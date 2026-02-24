@@ -141,7 +141,7 @@ flowchart TD
     Client[Cliente HTTP] --> Controller[TaskController]
     Controller --> Service[TaskService]
     Service --> Repo[TaskRepository]
-    Repo --> DB[(H2 Database)]
+    Repo --> DB[(H2 DB)]
 ```
 
 ### Entidad y tabla
@@ -187,4 +187,3 @@ curl -X PATCH "http://localhost:8081/api/tasks/1" -H "Content-Type: application/
 
 curl -X DELETE "http://localhost:8081/api/tasks/1"
 ```
-
